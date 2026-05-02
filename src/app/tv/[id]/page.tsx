@@ -1,6 +1,6 @@
 import { getMediaDetails } from "@/lib/api";
 import { notFound } from "next/navigation";
-import { Calendar, Star, Plus, Share2, Video, Tv } from "lucide-react";
+import { Calendar, Star, Plus, Share2, Video, Tv, Play } from "lucide-react";
 import EpisodeSelector from "@/components/EpisodeSelector";
 import BackButton from "@/components/BackButton";
 
