@@ -31,7 +31,6 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   const [showGuide, setShowGuide] = useState(false);
   const [showControls, setShowControls] = useState(true);
 
-  // Auto-hide controls after 3 seconds of inactivity
   useEffect(() => {
     if (!showControls) return;
     const timer = setTimeout(() => setShowControls(false), 4000);
@@ -86,12 +85,11 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
       onClick={() => setShowControls(true)}
       onMouseMove={() => setShowControls(true)}
     >
-      {/* Top Navigation */}
-      <div className={`absolute top-0 left-0 w-full p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between z-20 bg-gradient-to-b from-black/95 via-black/40 to-transparent transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}>
+      <div className={`absolute top-0 left-0 w-full p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between z-30 bg-gradient-to-b from-black/95 via-black/40 to-transparent transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}>
         <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-0">
           <Link 
             href={`/${type}/${id}`}
-            className="text-white flex items-center gap-2 hover:bg-white/20 bg-white/10 px-4 py-2 rounded-full backdrop-blur-xl border border-white/10 transition-all active:scale-95 shadow-xl"
+            className="text-white flex items-center gap-2 hover:bg-white/20 bg-white/10 px-4 py-2 rounded-full backdrop-blur-xl border border-white/10 transition-all active:scale-95 shadow-xl pointer-events-auto"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="font-bold text-xs sm:text-sm">Exit</span>
@@ -107,7 +105,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-auto">
+        <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-auto pointer-events-auto">
           <button 
             onClick={(e) => { e.stopPropagation(); setShowGuide(!showGuide); }}
             className="flex items-center gap-2 text-gray-300 bg-white/5 hover:bg-white/10 px-3 py-2 rounded-full backdrop-blur-xl border border-white/5 transition-all"
@@ -159,7 +157,6 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
         </div>
       </div>
 
-      {/* Subtitle Guide Modal */}
       {showGuide && (
         <div className="absolute inset-0 z-40 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-500" onClick={(e) => e.stopPropagation()}>
           <div className="bg-surface border border-border p-6 sm:p-10 rounded-3xl sm:rounded-[40px] max-w-lg w-full shadow-2xl relative overflow-hidden">
@@ -169,14 +166,12 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             >
               <X className="w-5 h-5" />
             </button>
-            
             <div className="flex flex-col items-center text-center mb-6 sm:mb-10">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-4 sm:mb-6 border border-primary/20">
                 <Globe className="text-primary w-8 h-8 sm:w-10 sm:h-10" />
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-2">Fix Subtitles</h3>
             </div>
-
             <div className="space-y-4 sm:space-y-6 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
               {[
                 { title: "Switch Server", desc: "Try Server 1 or Server 4 for the best subtitle stability." },
@@ -194,7 +189,6 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
                 </div>
               ))}
             </div>
-            
             <button 
               onClick={() => setShowGuide(false)}
               className="w-full mt-8 sm:mt-10 bg-primary text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-primary/20 uppercase tracking-widest text-xs"
@@ -205,14 +199,17 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
         </div>
       )}
 
-      {/* Player Area */}
-      <div className="flex-grow relative bg-black">
+      <div className="flex-grow relative bg-black z-10">
         {iframeUrl ? (
           <iframe
             src={iframeUrl}
             className="w-full h-full border-none shadow-2xl"
-            allowFullScreen
-            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen={true}
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; display-capture"
+            // @ts-ignore
+            webkitallowfullscreen="true"
+            // @ts-ignore
+            mozallowfullscreen="true"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-[#050505]">
@@ -221,8 +218,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
         )}
       </div>
 
-      {/* Bottom Bar */}
-      <div className={`absolute bottom-0 left-0 w-full p-4 sm:p-8 flex items-center justify-between z-20 bg-gradient-to-t from-black/95 via-black/40 to-transparent transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
+      <div className={`absolute bottom-0 left-0 w-full p-4 sm:p-8 flex items-center justify-between z-30 bg-gradient-to-t from-black/95 via-black/40 to-transparent transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
         <div className="hidden sm:flex items-center gap-4">
           <div className="flex items-center gap-2 px-4 py-2 bg-black/60 rounded-full border border-white/10 backdrop-blur-md">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
@@ -230,7 +226,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-end pointer-events-auto">
           <button 
             onClick={(e) => { e.stopPropagation(); handleRestart(); }}
             className="flex items-center gap-2 text-white bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 sm:px-6 sm:py-3 rounded-xl backdrop-blur-xl transition-all"

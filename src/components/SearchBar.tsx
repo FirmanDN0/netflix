@@ -23,12 +23,11 @@ export default function SearchBar() {
   }, []);
 
   useEffect(() => {
-    // Instant search: no long debounce, search even for 1 character
     const performSearch = async () => {
       if (query.trim().length > 0) {
         setIsLoading(true);
         const data = await searchContent(query);
-        setResults(data.slice(0, 8)); // Show up to 8 results
+        setResults(data.slice(0, 8));
         setIsLoading(false);
         setIsOpen(true);
       } else {
@@ -37,7 +36,7 @@ export default function SearchBar() {
       }
     };
 
-    const timer = setTimeout(performSearch, 150); // Small debounce for performance but feels instant
+    const timer = setTimeout(performSearch, 150);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -60,32 +59,32 @@ export default function SearchBar() {
 
   return (
     <div className="relative" ref={containerRef}>
-      <div className="flex items-center bg-surface border border-border rounded-full px-4 py-2 w-64 focus-within:ring-2 focus-within:ring-primary focus-within:w-80 transition-all duration-300">
-        <Search className="w-4 h-4 text-gray-400 mr-2" />
+      <div className="flex items-center bg-surface border border-border rounded-full px-3 py-1.5 sm:px-4 sm:py-2 w-32 xs:w-40 sm:w-64 focus-within:w-48 xs:focus-within:w-56 sm:focus-within:w-80 transition-all duration-300">
+        <Search className="w-3.5 h-3.5 sm:w-4 h-4 text-gray-400 mr-2 shrink-0" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Type to search..."
-          className="bg-transparent border-none outline-none text-sm w-full text-foreground placeholder:text-gray-500"
+          placeholder="Search..."
+          className="bg-transparent border-none outline-none text-xs sm:text-sm w-full text-foreground placeholder:text-gray-500"
           autoComplete="off"
         />
-        {isLoading && <Loader2 className="w-4 h-4 text-primary animate-spin ml-2" />}
+        {isLoading && <Loader2 className="w-3 h-3 sm:w-4 h-4 text-primary animate-spin ml-2 shrink-0" />}
         {query && !isLoading && (
-          <button onClick={() => setQuery("")} className="ml-2 text-gray-400 hover:text-white">
-            <X className="w-4 h-4" />
+          <button onClick={() => setQuery("")} className="ml-2 text-gray-400 hover:text-white shrink-0">
+            <X className="w-3 h-3 sm:w-4 h-4" />
           </button>
         )}
       </div>
 
       {isOpen && query.length > 0 && (
-        <div className="absolute top-full mt-2 w-full min-w-[320px] right-0 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50 glass-panel">
+        <div className="absolute top-full mt-2 w-screen max-w-[320px] sm:w-full right-0 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50 glass-panel">
           {results.length > 0 ? (
             <div className="p-2">
               <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-gray-500 font-bold border-b border-border/50 mb-1">
                 Matching Titles
               </div>
-              <ul>
+              <ul className="max-h-[70vh] overflow-y-auto custom-scrollbar">
                 {results.map((item) => (
                   <li key={`${item.type}-${item.id}`}>
                     <Link
@@ -94,15 +93,15 @@ export default function SearchBar() {
                       className="flex items-center gap-3 p-2 hover:bg-primary/10 rounded-lg transition-colors group"
                     >
                       {item.poster_path ? (
-                        <img src={item.poster_path} alt="" className="w-10 h-14 object-cover rounded shadow-md" />
+                        <img src={item.poster_path} alt="" className="w-8 h-12 sm:w-10 sm:h-14 object-cover rounded shadow-md" />
                       ) : (
-                        <div className="w-10 h-14 bg-border rounded flex-shrink-0" />
+                        <div className="w-8 h-12 sm:w-10 sm:h-14 bg-border rounded flex-shrink-0" />
                       )}
                       <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate">
+                        <span className="text-xs sm:text-sm font-semibold text-white group-hover:text-primary transition-colors truncate">
                           {highlightMatch(item.title || item.name || "", query)}
                         </span>
-                        <span className="text-[10px] text-gray-400 uppercase mt-0.5">
+                        <span className="text-[9px] sm:text-[10px] text-gray-400 uppercase mt-0.5">
                           {item.type} • {item.release_date || item.first_air_date}
                         </span>
                       </div>
@@ -115,7 +114,6 @@ export default function SearchBar() {
             !isLoading && (
               <div className="p-8 text-center text-sm text-gray-400">
                 <p>No results found for "<span className="text-white italic">{query}</span>"</p>
-                <p className="text-xs mt-1 italic">Try searching for something else</p>
               </div>
             )
           )}

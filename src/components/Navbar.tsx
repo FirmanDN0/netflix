@@ -23,11 +23,11 @@ export default function Navbar() {
         isScrolled || isMobileMenuOpen ? "bg-surface shadow-md" : "bg-gradient-to-b from-black/80 to-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tighter shrink-0">
-            <PlaySquare className="w-8 h-8 fill-primary" />
-            <span>Vidia</span>
+      <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
+          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl sm:text-2xl tracking-tighter shrink-0">
+            <PlaySquare className="w-6 h-6 sm:w-8 h-8 fill-primary" />
+            <span className="hidden xs:inline">Vidia</span>
           </Link>
 
           <div className="hidden md:flex gap-6 text-sm font-medium text-gray-300">
@@ -38,12 +38,12 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <SearchBar />
           
           {/* Mobile Menu Toggle */}
           <button 
-            className="md:hidden p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            className="md:hidden p-2 text-white hover:bg-white/10 rounded-full transition-colors shrink-0"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
