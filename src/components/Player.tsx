@@ -25,6 +25,14 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   const [iframeUrl, setIframeUrl] = useState<string>("");
   const [showSources, setShowSources] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+
+  // Auto-hide controls after 3 seconds of inactivity
+  useEffect(() => {
+    if (!showControls) return;
+    const timer = setTimeout(() => setShowControls(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showControls]);
 
   useEffect(() => {
     const source = SOURCES[activeSource];
@@ -58,8 +66,16 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
 
   return (
     <div className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans">
-      {/* TOP CONTROLS - ALWAYS VISIBLE AS REQUESTED */}
-      <div className="fixed top-0 left-0 w-full p-3 sm:p-6 z-[100]">
+      
+      {/* SENSOR AREA: Top 25% of screen detects movement to show controls */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[25%] z-[110] cursor-pointer"
+        onMouseMove={() => setShowControls(true)}
+        onClick={() => setShowControls(!showControls)}
+      />
+
+      {/* TOP CONTROLS - Fades in/out based on state */}
+      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[120] transition-all duration-500 ease-in-out ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/95 via-black/40 to-transparent -z-10" />
         
         <div className="flex items-start justify-between gap-4">
