@@ -25,13 +25,6 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   const [iframeUrl, setIframeUrl] = useState<string>("");
   const [showSources, setShowSources] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-
-  useEffect(() => {
-    if (!showControls) return;
-    const timer = setTimeout(() => setShowControls(false), 4000);
-    return () => clearTimeout(timer);
-  }, [showControls]);
 
   useEffect(() => {
     const source = SOURCES[activeSource];
@@ -64,16 +57,13 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans"
-      onClick={() => setShowControls(!showControls)}
-    >
-      {/* TOP CONTROLS - FIXED POSITION */}
-      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[100] transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/40 to-transparent -z-10" />
+    <div className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans">
+      {/* TOP CONTROLS - ALWAYS VISIBLE AS REQUESTED */}
+      <div className="fixed top-0 left-0 w-full p-3 sm:p-6 z-[100]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/95 via-black/40 to-transparent -z-10" />
         
         <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 pointer-events-auto max-w-[70%]">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 pointer-events-auto max-w-[75%]">
             <Link 
               href={`/${type}/${id}`}
               className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md transition-all active:scale-95 shadow-lg"
@@ -101,7 +91,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             )}
 
             <div className="w-full mt-2 sm:mt-0 sm:w-auto">
-              <h2 className="text-white font-black text-xs sm:text-base tracking-tight drop-shadow-md line-clamp-1 opacity-80">
+              <h2 className="text-white font-black text-xs sm:text-base tracking-tight drop-shadow-md line-clamp-1 opacity-60">
                 {title} {type === 'tv' ? `(S${season}E${episode})` : ""}
               </h2>
             </div>
