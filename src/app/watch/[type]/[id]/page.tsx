@@ -2,6 +2,9 @@ import { getMediaDetails } from "@/lib/api";
 import { notFound } from "next/navigation";
 import Player from "@/components/Player";
 
+// Force dynamic rendering for the watch page
+export const dynamic = 'force-dynamic';
+
 export default async function WatchPage({ 
   params,
   searchParams 

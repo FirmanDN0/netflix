@@ -4,8 +4,16 @@ import Link from "next/link";
 import { Play, Calendar, Star, Plus, Share2, Video, Info } from "lucide-react";
 import BackButton from "@/components/BackButton";
 
+// Force dynamic rendering to prevent prerendering errors with missing params
+export const dynamic = 'force-dynamic';
+
 export default async function MovieDetails({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
+  
+  if (!resolvedParams?.id) {
+    notFound();
+  }
+
   const movie = await getMediaDetails(resolvedParams.id, 'movie');
 
   if (!movie) {
@@ -30,11 +38,9 @@ export default async function MovieDetails({ params }: { params: Promise<{ id: s
       </div>
 
       <div className="container relative z-20 mx-auto px-4 pt-28 lg:px-8">
-        {/* Back Button points directly to /movies */}
         <BackButton href="/movies" />
 
         <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start text-center lg:text-left">
-          {/* High Fidelity Poster */}
           <div className="w-64 md:w-80 shrink-0 rounded-2xl overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border border-white/10 group relative">
             {movie.poster_path ? (
               <img src={movie.poster_path} alt={movie.title} className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -77,7 +83,6 @@ export default async function MovieDetails({ params }: { params: Promise<{ id: s
               {movie.overview || "No description available for this title."}
             </p>
 
-            {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <Link 
                 href={`/watch/movie/${movie.id}`}

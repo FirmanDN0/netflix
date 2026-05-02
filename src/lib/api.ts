@@ -70,8 +70,8 @@ export async function getRecentlyAdded(type: 'movie' | 'tv' = 'movie') {
 export async function getTopRated(type: 'movie' | 'tv' = 'movie') {
     const res = await fetch(`${TMDB_BASE_URL}/${type}/top_rated?api_key=${TMDB_API_KEY}`);
     const data = await res.json();
-    return data.results.map((item: any) => ({
-        id: item.id.toString(),
+    return (data.results || []).map((item: any) => ({
+        id: item.id?.toString() || "",
         title: item.title || item.name,
         poster_path: item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "",
         type: type,
@@ -82,8 +82,8 @@ export async function getTopRated(type: 'movie' | 'tv' = 'movie') {
 export async function getMostPopular(type: 'movie' | 'tv' = 'movie') {
     const res = await fetch(`${TMDB_BASE_URL}/${type}/popular?api_key=${TMDB_API_KEY}`);
     const data = await res.json();
-    return data.results.map((item: any) => ({
-        id: item.id.toString(),
+    return (data.results || []).map((item: any) => ({
+        id: item.id?.toString() || "",
         title: item.title || item.name,
         poster_path: item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "",
         type: type,
@@ -92,9 +92,13 @@ export async function getMostPopular(type: 'movie' | 'tv' = 'movie') {
 }
 
 export async function getGenres(type: 'movie' | 'tv'): Promise<Genre[]> {
-    const res = await fetch(`${TMDB_BASE_URL}/genre/${type}/list?api_key=${TMDB_API_KEY}`);
-    const data = await res.json();
-    return data.genres || [];
+    try {
+        const res = await fetch(`${TMDB_BASE_URL}/genre/${type}/list?api_key=${TMDB_API_KEY}`);
+        const data = await res.json();
+        return data.genres || [];
+    } catch (e) {
+        return [];
+    }
 }
 
 export async function getCountries() {
@@ -136,8 +140,8 @@ export async function discoverContent(params: {
     try {
         const res = await fetch(url);
         const data = await res.json();
-        return data.results.map((item: any) => ({
-            id: item.id.toString(),
+        return (data.results || []).map((item: any) => ({
+            id: item.id?.toString() || "",
             title: item.title || item.name,
             name: item.title || item.name,
             poster_path: item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "",
@@ -151,6 +155,8 @@ export async function discoverContent(params: {
 }
 
 export async function getMediaDetails(id: string, type: 'movie' | 'tv'): Promise<MediaItem | null> {
+    if (!id) return null; // Safety check for prerendering
+    
     try {
         const res = await fetch(`${TMDB_BASE_URL}/${type}/${id}?api_key=${TMDB_API_KEY}`);
         if (res.ok) {
@@ -159,7 +165,7 @@ export async function getMediaDetails(id: string, type: 'movie' | 'tv'): Promise
             const extData = await extRes.json();
             
             return {
-                id: data.id.toString(),
+                id: data.id?.toString() || id,
                 title: data.title || data.name,
                 name: data.title || data.name,
                 poster_path: data.poster_path ? `${IMAGE_BASE_URL}${data.poster_path}` : "",
@@ -167,12 +173,12 @@ export async function getMediaDetails(id: string, type: 'movie' | 'tv'): Promise
                 overview: data.overview,
                 release_date: data.release_date || data.first_air_date,
                 type,
-                imdb_id: extData.imdb_id || (id.startsWith('tt') ? id : undefined)
+                imdb_id: extData.imdb_id || (id?.startsWith('tt') ? id : undefined)
             };
         }
     } catch (e) {}
 
-    return { id, title: "Loading...", poster_path: "", type, imdb_id: id.startsWith('tt') ? id : undefined };
+    return { id, title: "Loading...", poster_path: "", type, imdb_id: id?.startsWith('tt') ? id : undefined };
 }
 
 export async function searchContent(query: string): Promise<MediaItem[]> {
@@ -180,10 +186,10 @@ export async function searchContent(query: string): Promise<MediaItem[]> {
   try {
       const res = await fetch(`${TMDB_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&api_key=${TMDB_API_KEY}`);
       const data = await res.json();
-      return data.results
+      return (data.results || [])
           .filter((i: any) => i.media_type === 'movie' || i.media_type === 'tv')
           .map((item: any) => ({
-              id: item.id.toString(),
+              id: item.id?.toString() || "",
               title: item.title || item.name,
               name: item.title || item.name,
               poster_path: item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "",

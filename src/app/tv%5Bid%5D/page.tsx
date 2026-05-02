@@ -4,8 +4,16 @@ import { Calendar, Star, Plus, Share2, Video, Info, Tv } from "lucide-react";
 import EpisodeSelector from "@/components/EpisodeSelector";
 import BackButton from "@/components/BackButton";
 
+// Force dynamic rendering to prevent prerendering errors with missing params
+export const dynamic = 'force-dynamic';
+
 export default async function TvDetails({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
+  
+  if (!resolvedParams?.id) {
+    notFound();
+  }
+
   const show = await getMediaDetails(resolvedParams.id, 'tv');
 
   if (!show) {
@@ -30,11 +38,9 @@ export default async function TvDetails({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="container relative z-20 mx-auto px-4 pt-28 lg:px-8">
-        {/* Back Button points directly to /tv */}
         <BackButton href="/tv" />
 
         <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start text-center lg:text-left mb-16">
-          {/* High Fidelity Poster */}
           <div className="w-64 md:w-80 shrink-0 rounded-2xl overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] border border-white/10 group relative">
             {show.poster_path ? (
               <img src={show.poster_path} alt={show.name} className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -78,7 +84,6 @@ export default async function TvDetails({ params }: { params: Promise<{ id: stri
               {show.overview || "No description available for this title."}
             </p>
 
-            {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <button 
                 onClick={() => {
@@ -107,7 +112,6 @@ export default async function TvDetails({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* Episode Selection Section */}
         <div id="episode-section" className="max-w-6xl mx-auto pt-10 scroll-mt-24">
           <div className="mb-8 flex items-center gap-3">
             <span className="w-1 h-8 bg-primary rounded-full"></span>
