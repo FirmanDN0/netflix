@@ -2,8 +2,9 @@ import { discoverContent, getGenres } from "@/lib/api";
 import ContentGrid from "@/components/ContentGrid";
 import FilterBar from "@/components/FilterBar";
 import Pagination from "@/components/Pagination";
+import BrowseTracker from "@/components/BrowseTracker";
+import { Suspense } from "react";
 
-// Force dynamic rendering and ensure searchParams is awaited
 export const dynamic = 'force-dynamic';
 
 interface MoviesPageProps {
@@ -17,7 +18,6 @@ interface MoviesPageProps {
 }
 
 export default async function MoviesPage({ searchParams }: MoviesPageProps) {
-  // AW_FIX: Next.js 15+ requires awaiting searchParams Promise
   const sParams = await searchParams;
   const genreId = sParams.genre;
   const currentPage = parseInt(sParams.page || "1");
@@ -39,6 +39,11 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-24">
+      {/* Remember this page state */}
+      <Suspense fallback={null}>
+        <BrowseTracker />
+      </Suspense>
+
       <FilterBar type="movie" />
       
       {items.length > 0 ? (

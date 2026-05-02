@@ -19,7 +19,8 @@ export interface Genre {
     name: string;
 }
 
-const TMDB_API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
+// Access API Key from environment variables for security
+const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || '3fd2be6f0c70a2a598f084ddfb75487c';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
 
