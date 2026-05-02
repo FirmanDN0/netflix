@@ -19,7 +19,6 @@ export interface Genre {
     name: string;
 }
 
-// Access API Key from environment variables for security
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || '3fd2be6f0c70a2a598f084ddfb75487c';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
@@ -27,19 +26,41 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
 const VIDAPI_MOVIES = 'https://vidapi.ru/movies/latest/page-';
 const VIDAPI_TV = 'https://vidapi.ru/tvshows/latest/page-';
 
+/**
+ * Helper to filter out content that is likely not available on servers yet
+ */
+function filterAvailableContent(items: MediaItem[]): MediaItem[] {
+  const now = new Date();
+  return items.filter(item => {
+    // 1. Must have a poster
+    if (!item.poster_path || item.poster_path.includes("null")) return false;
+
+    // 2. Must have a release date
+    const dateStr = item.release_date || item.first_air_date;
+    if (!dateStr) return false;
+
+    // 3. Must be released (not in the future)
+    const releaseDate = new Date(dateStr);
+    if (releaseDate > now) return false;
+
+    return true;
+  });
+}
+
 export async function fetchMovies(): Promise<MediaItem[]> {
     try {
         const res = await fetch(`${VIDAPI_MOVIES}1.json`);
         if (res.ok) {
             const data = await res.json();
-            return data.items.map((i: any) => ({
+            const items = data.items.map((i: any) => ({
                 id: i.imdb_id || i.tmdb_id?.toString(),
                 title: i.title,
                 poster_path: i.poster_url,
                 type: 'movie',
                 imdb_id: i.imdb_id,
-                release_date: i.year
+                release_date: i.year?.toString()
             }));
+            return filterAvailableContent(items);
         }
     } catch (e) {}
     return [];
@@ -50,14 +71,15 @@ export async function fetchTvShows(): Promise<MediaItem[]> {
         const res = await fetch(`${VIDAPI_TV}1.json`);
         if (res.ok) {
             const data = await res.json();
-            return data.items.map((i: any) => ({
+            const items = data.items.map((i: any) => ({
                 id: i.imdb_id || i.tmdb_id?.toString(),
                 title: i.title,
                 poster_path: i.poster_url,
                 type: 'tv',
                 imdb_id: i.imdb_id,
-                release_date: i.year
+                release_date: i.year?.toString()
             }));
+            return filterAvailableContent(items);
         }
     } catch (e) {}
     return [];
@@ -70,25 +92,27 @@ export async function getRecentlyAdded(type: 'movie' | 'tv' = 'movie') {
 export async function getTopRated(type: 'movie' | 'tv' = 'movie') {
     const res = await fetch(`${TMDB_BASE_URL}/${type}/top_rated?api_key=${TMDB_API_KEY}`);
     const data = await res.json();
-    return (data.results || []).map((item: any) => ({
+    const items = (data.results || []).map((item: any) => ({
         id: item.id?.toString() || "",
         title: item.title || item.name,
         poster_path: item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "",
         type: type,
         release_date: item.release_date || item.first_air_date
     }));
+    return filterAvailableContent(items);
 }
 
 export async function getMostPopular(type: 'movie' | 'tv' = 'movie') {
     const res = await fetch(`${TMDB_BASE_URL}/${type}/popular?api_key=${TMDB_API_KEY}`);
     const data = await res.json();
-    return (data.results || []).map((item: any) => ({
+    const items = (data.results || []).map((item: any) => ({
         id: item.id?.toString() || "",
         title: item.title || item.name,
         poster_path: item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "",
         type: type,
         release_date: item.release_date || item.first_air_date
     }));
+    return filterAvailableContent(items);
 }
 
 export async function getGenres(type: 'movie' | 'tv'): Promise<Genre[]> {
@@ -140,7 +164,7 @@ export async function discoverContent(params: {
     try {
         const res = await fetch(url);
         const data = await res.json();
-        return (data.results || []).map((item: any) => ({
+        const items = (data.results || []).map((item: any) => ({
             id: item.id?.toString() || "",
             title: item.title || item.name,
             name: item.title || item.name,
@@ -149,13 +173,14 @@ export async function discoverContent(params: {
             release_date: item.release_date || item.first_air_date,
             overview: item.overview
         }));
+        return filterAvailableContent(items);
     } catch (e) {
         return [];
     }
 }
 
 export async function getMediaDetails(id: string, type: 'movie' | 'tv'): Promise<MediaItem | null> {
-    if (!id) return null; // Safety check for prerendering
+    if (!id) return null;
     
     try {
         const res = await fetch(`${TMDB_BASE_URL}/${type}/${id}?api_key=${TMDB_API_KEY}`);
@@ -186,7 +211,7 @@ export async function searchContent(query: string): Promise<MediaItem[]> {
   try {
       const res = await fetch(`${TMDB_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&api_key=${TMDB_API_KEY}`);
       const data = await res.json();
-      return (data.results || [])
+      const items = (data.results || [])
           .filter((i: any) => i.media_type === 'movie' || i.media_type === 'tv')
           .map((item: any) => ({
               id: item.id?.toString() || "",
@@ -197,6 +222,7 @@ export async function searchContent(query: string): Promise<MediaItem[]> {
               release_date: item.release_date || item.first_air_date,
               overview: item.overview
           }));
+      return filterAvailableContent(items);
   } catch (error) {
       return [];
   }
