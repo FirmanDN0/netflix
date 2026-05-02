@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X } from "lucide-react";
+import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X, Lock, Unlock } from "lucide-react";
 import Link from "next/link";
 
 interface PlayerProps {
@@ -26,12 +26,13 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   const [showSources, setShowSources] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    if (!showControls) return;
+    if (!showControls || isLocked) return;
     const timer = setTimeout(() => setShowControls(false), 4000);
     return () => clearTimeout(timer);
-  }, [showControls]);
+  }, [showControls, isLocked]);
 
   useEffect(() => {
     const source = SOURCES[activeSource];
@@ -63,14 +64,32 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
     setTimeout(() => setIframeUrl(currentUrl), 100);
   };
 
+  const toggleControls = () => {
+    if (isLocked) return;
+    setShowControls(!showControls);
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans"
-      onClick={() => setShowControls(true)}
-      onMouseMove={() => setShowControls(true)}
+      onClick={toggleControls}
     >
-      {/* TOP CONTROLS - FIXED POSITION */}
-      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[100] transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
+      {/* LOCK BUTTON - ALWAYS ACCESSIBLE BUT MINIMAL */}
+      <div className="fixed left-4 bottom-24 z-[200] pointer-events-auto">
+        <button 
+          onClick={(e) => { e.stopPropagation(); setIsLocked(!isLocked); if(!isLocked) setShowControls(false); }}
+          className={`p-4 rounded-full backdrop-blur-md border transition-all active:scale-95 ${
+            isLocked 
+              ? "bg-primary text-white border-primary shadow-xl shadow-primary/40" 
+              : "bg-white/10 text-white/40 border-white/10 opacity-20 hover:opacity-100"
+          }`}
+        >
+          {isLocked ? <Lock className="w-6 h-6" /> : <Unlock className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* TOP CONTROLS */}
+      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[100] transition-all duration-500 ${showControls && !isLocked ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/40 to-transparent -z-10" />
         
         <div className="flex items-start justify-between gap-4">
@@ -112,7 +131,6 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             <button 
               onClick={(e) => { e.stopPropagation(); setShowGuide(!showGuide); }}
               className="hidden xs:flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-all shadow-lg"
-              title="Guide"
             >
               <HelpCircle className="w-4 h-4 text-gray-300" />
             </button>
@@ -128,8 +146,8 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
 
               {showSources && (
                 <div className="absolute top-full right-0 mt-3 w-40 bg-surface/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
-                  <div className="p-2 border-b border-white/5 bg-white/5">
-                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest text-center">Switch Server</p>
+                  <div className="p-2 border-b border-white/5 bg-white/5 text-center">
+                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Servers</p>
                   </div>
                   {SOURCES.map((source, index) => (
                     <button
@@ -153,7 +171,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
         </div>
       </div>
 
-      {/* VIDEO AREA - NO OVERLAYS AT THE BOTTOM */}
+      {/* VIDEO AREA */}
       <div className="flex-grow relative bg-black">
         {iframeUrl ? (
           <iframe
@@ -173,18 +191,14 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
         )}
       </div>
 
-      {/* Subtitle Guide Overlay */}
+      {/* Guide Overlay */}
       {showGuide && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300" onClick={(e) => e.stopPropagation()}>
-          <div className="bg-surface border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl relative">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl relative text-center">
             <button onClick={() => setShowGuide(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X className="w-5 h-5" /></button>
-            <h3 className="text-lg font-black text-white mb-4 uppercase tracking-tight">Subtitle Guide</h3>
-            <div className="space-y-3">
-              <p className="text-gray-400 text-xs leading-relaxed">1. Click the **CC** icon in the bottom right corner of the video player.</p>
-              <p className="text-gray-400 text-xs leading-relaxed">2. Choose **Indonesian** or **English**.</p>
-              <p className="text-gray-400 text-xs leading-relaxed">3. If it fails, try switching to **Server 1**.</p>
-            </div>
-            <button onClick={() => setShowGuide(false)} className="w-full mt-6 bg-primary text-white font-black py-3 rounded-xl uppercase tracking-widest text-[10px]">Close</button>
+            <h3 className="text-lg font-black text-white mb-4 uppercase">Subtitle Guide</h3>
+            <p className="text-gray-400 text-xs leading-relaxed mb-6">Click CC in the player bottom right.</p>
+            <button onClick={() => setShowGuide(false)} className="w-full bg-primary text-white font-black py-3 rounded-xl uppercase tracking-widest text-[10px]">Close</button>
           </div>
         </div>
       )}
