@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X, Maximize, Minimize } from "lucide-react";
 import { useRef } from "react";
@@ -16,8 +16,9 @@ interface PlayerProps {
 }
 
 const SOURCES = [
-  { name: "Server 1 (Auto-Indo)", domain: "https://vidsrc.xyz/embed" },
-  { name: "Server 2 (No-Error Mode)", domain: "https://embed.smashystream.com/playere.php" },
+  { name: "Server 1", domain: "https://vidsrc.xyz/embed", pattern: 'path' },
+  { name: "Server 2", domain: "https://embed.smashystream.com/playere.php", pattern: 'query' },
+  { name: "Server 3 (VidAPI)", domain: "https://vaplayer.ru/embed", pattern: 'path' },
 ];
 
 export default function Player({ id, type, title, poster, season, episode }: PlayerProps) {
@@ -42,14 +43,18 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
     let url = "";
     const cleanId = id;
 
-    if (source.domain.includes("vidsrc.xyz")) {
+    if (source.pattern === 'path') {
       url = type === 'movie'
-        ? `${source.domain}/movie/${cleanId}`
-        : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}`;
-    } else if (source.domain.includes("smashystream.com")) {
+        ? `${source.domain}/movie/${id}`
+        : `${source.domain}/tv/${id}/${season || 1}/${episode || 1}`;
+    } else if (source.pattern === 'query') {
       url = type === 'movie'
-        ? `${source.domain}?tmdb=${cleanId}`
-        : `${source.domain}?tmdb=${cleanId}&season=${season || 1}&episode=${episode || 1}`;
+        ? `${source.domain}?tmdb=${id}`
+        : `${source.domain}?tmdb=${id}&season=${season || 1}&episode=${episode || 1}`;
+    } else if (source.pattern === 'query_video') {
+      url = type === 'movie'
+        ? `${source.domain}?video_id=${id}`
+        : `${source.domain}?video_id=${id}&s=${season || 1}&e=${episode || 1}`;
     }
 
     setIframeUrl(url);
@@ -230,7 +235,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
 
       {/* VIDEO AREA */}
       <div className="flex-grow relative bg-black">
-        {iframeUrl ? (
+        {useMemo(() => iframeUrl ? (
           <div 
             className="w-full h-full"
             dangerouslySetInnerHTML={{
@@ -250,7 +255,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
           <div className="w-full h-full flex items-center justify-center bg-black">
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div>
-        )}
+        ), [iframeUrl])}
       </div>
 
       {/* Guide Overlay */}
