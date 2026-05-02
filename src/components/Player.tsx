@@ -231,17 +231,20 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
       {/* VIDEO AREA */}
       <div className="flex-grow relative bg-black">
         {iframeUrl ? (
-          <iframe
-            src={iframeUrl}
-            className="w-full h-full border-none"
-            allowFullScreen
-            // @ts-ignore
-            allowfullscreen="true"
-            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; display-capture"
-            // @ts-ignore
-            webkitallowfullscreen="true"
-            // @ts-ignore
-            mozallowfullscreen="true"
+          <div 
+            className="w-full h-full"
+            dangerouslySetInnerHTML={{
+              __html: `
+                <iframe 
+                  src="${iframeUrl}" 
+                  style="width: 100%; height: 100%; border: none;" 
+                  allowfullscreen="true" 
+                  webkitallowfullscreen="true" 
+                  mozallowfullscreen="true" 
+                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; display-capture"
+                ></iframe>
+              `
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-black">
