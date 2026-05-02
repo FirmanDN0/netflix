@@ -1,0 +1,61 @@
+import { discoverContent, getGenres } from "@/lib/api";
+import ContentGrid from "@/components/ContentGrid";
+import FilterBar from "@/components/FilterBar";
+import Pagination from "@/components/Pagination";
+
+// Force dynamic rendering and ensure searchParams is awaited
+export const dynamic = 'force-dynamic';
+
+interface MoviesPageProps {
+  searchParams: Promise<{
+    genre?: string;
+    country?: string;
+    year?: string;
+    sortBy?: string;
+    page?: string;
+  }>;
+}
+
+export default async function MoviesPage({ searchParams }: MoviesPageProps) {
+  // AW_FIX: Next.js 15+ requires awaiting searchParams Promise
+  const sParams = await searchParams;
+  const genreId = sParams.genre;
+  const currentPage = parseInt(sParams.page || "1");
+  
+  const [items, genres] = await Promise.all([
+    discoverContent({
+      type: 'movie',
+      genre: genreId,
+      country: sParams.country,
+      year: sParams.year,
+      sortBy: sParams.sortBy || 'popularity.desc',
+      page: currentPage,
+    }),
+    getGenres('movie')
+  ]);
+
+  const activeGenre = genres.find(g => g.id.toString() === genreId)?.name;
+  const title = activeGenre ? `${activeGenre} Movies` : "All Movies";
+
+  return (
+    <div className="container mx-auto px-4 lg:px-8 py-24">
+      <FilterBar type="movie" />
+      
+      {items.length > 0 ? (
+        <>
+          <ContentGrid 
+            title={title} 
+            items={items} 
+            type="movie" 
+          />
+          <Pagination currentPage={currentPage} />
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+          <p className="text-xl font-medium">No results found for these filters.</p>
+          <p className="text-sm">Try adjusting your selection.</p>
+        </div>
+      )}
+    </div>
+  );
+}
