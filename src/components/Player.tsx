@@ -16,9 +16,8 @@ interface PlayerProps {
 }
 
 const SOURCES = [
-  { name: "Server 1 (Clean Mode)", domain: "https://vidlink.pro/embed" },
-  { name: "Server 2 (Auto-Indo)", domain: "https://vidsrc.xyz/embed" },
-  { name: "Server 3 (No-Error Mode)", domain: "https://embed.smashystream.com/playere.php" },
+  { name: "Server 1 (Auto-Indo)", domain: "https://vidsrc.xyz/embed" },
+  { name: "Server 2 (No-Error Mode)", domain: "https://embed.smashystream.com/playere.php" },
 ];
 
 export default function Player({ id, type, title, poster, season, episode }: PlayerProps) {
@@ -40,11 +39,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
     let url = "";
     const cleanId = id;
 
-    if (source.domain.includes("vidlink.pro")) {
-      url = type === 'movie' 
-        ? `${source.domain}/movie/${cleanId}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914&autoplay=false`
-        : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914&autoplay=false`;
-    } else if (source.domain.includes("vidsrc.xyz")) {
+    if (source.domain.includes("vidsrc.xyz")) {
       url = type === 'movie'
         ? `${source.domain}/movie/${cleanId}`
         : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}`;
@@ -164,7 +159,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             </div>
             <div className="space-y-4 sm:space-y-6 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
               {[
-                { title: "Switch Server", desc: "Server 1 is the cleanest. Try Server 2 or 3 for auto-subtitles." },
+                { title: "Switch Server", desc: "Try Server 1 or Server 2 for the best stability." },
                 { title: "Enable CC", desc: "Click the CC icon in the bottom right corner of the player." },
                 { title: "Indonesian", desc: "Choose Indonesian from the settings or use auto-translate." }
               ].map((step, i) => (
@@ -196,9 +191,6 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             className="w-full h-full border-none shadow-2xl"
             allowFullScreen={true}
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; display-capture"
-            // Standard Sandbox for maximum compatibility
-            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-popups allow-modals"
-            referrerPolicy="no-referrer"
             // @ts-ignore
             webkitallowfullscreen="true"
             // @ts-ignore
