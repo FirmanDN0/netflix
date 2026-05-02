@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X, Lock, Unlock } from "lucide-react";
+import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X } from "lucide-react";
 import Link from "next/link";
 
 interface PlayerProps {
@@ -26,13 +26,12 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   const [showSources, setShowSources] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    if (!showControls || isLocked) return;
+    if (!showControls) return;
     const timer = setTimeout(() => setShowControls(false), 4000);
     return () => clearTimeout(timer);
-  }, [showControls, isLocked]);
+  }, [showControls]);
 
   useEffect(() => {
     const source = SOURCES[activeSource];
@@ -64,32 +63,13 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
     setTimeout(() => setIframeUrl(currentUrl), 100);
   };
 
-  const toggleControls = () => {
-    if (isLocked) return;
-    setShowControls(!showControls);
-  };
-
   return (
     <div 
       className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans"
-      onClick={toggleControls}
+      onClick={() => setShowControls(!showControls)}
     >
-      {/* LOCK BUTTON - ALWAYS ACCESSIBLE BUT MINIMAL */}
-      <div className="fixed left-4 bottom-24 z-[200] pointer-events-auto">
-        <button 
-          onClick={(e) => { e.stopPropagation(); setIsLocked(!isLocked); if(!isLocked) setShowControls(false); }}
-          className={`p-4 rounded-full backdrop-blur-md border transition-all active:scale-95 ${
-            isLocked 
-              ? "bg-primary text-white border-primary shadow-xl shadow-primary/40" 
-              : "bg-white/10 text-white/40 border-white/10 opacity-20 hover:opacity-100"
-          }`}
-        >
-          {isLocked ? <Lock className="w-6 h-6" /> : <Unlock className="w-6 h-6" />}
-        </button>
-      </div>
-
-      {/* TOP CONTROLS */}
-      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[100] transition-all duration-500 ${showControls && !isLocked ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
+      {/* TOP CONTROLS - FIXED POSITION */}
+      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[100] transition-all duration-500 ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/40 to-transparent -z-10" />
         
         <div className="flex items-start justify-between gap-4">
