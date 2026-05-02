@@ -196,8 +196,9 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             className="w-full h-full border-none shadow-2xl"
             allowFullScreen={true}
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; display-capture"
-            // Balanced Sandbox: Allow activation-based navigation to keep the player working
-            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+            // Standard Sandbox for maximum compatibility
+            sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-popups allow-modals"
+            referrerPolicy="no-referrer"
             // @ts-ignore
             webkitallowfullscreen="true"
             // @ts-ignore
