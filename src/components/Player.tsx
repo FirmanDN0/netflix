@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X } from "lucide-react";
+import { ArrowLeft, RotateCcw, SkipForward, Server, HelpCircle, X, Maximize, Minimize } from "lucide-react";
+import { useRef } from "react";
 import Link from "next/link";
 
 interface PlayerProps {
@@ -26,6 +27,8 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
   const [showSources, setShowSources] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Auto-hide controls after 3 seconds of inactivity
   useEffect(() => {
@@ -64,22 +67,79 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
     setTimeout(() => setIframeUrl(currentUrl), 100);
   };
 
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+
+    const elem = containerRef.current as any;
+    if (!document.fullscreenElement && 
+        //@ts-ignore
+        !document.webkitFullscreenElement && 
+        //@ts-ignore
+        !document.mozFullScreenElement &&
+        //@ts-ignore
+        !document.msFullscreenElement) {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    } else {
+      const doc = document as any;
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      } else if (doc.mozCancelFullScreen) {
+        doc.mozCancelFullScreen();
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen();
+      }
+    }
+  };
+
+  // Sync fullscreen state if changed via escape key or system controls
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!(
+        document.fullscreenElement || 
+        (document as any).webkitFullscreenElement || 
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      ));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    document.addEventListener('mozfullscreenchange', handleFsChange);
+    document.addEventListener('MSFullscreenChange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+      document.removeEventListener('mozfullscreenchange', handleFsChange);
+      document.removeEventListener('MSFullscreenChange', handleFsChange);
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans">
+    <div ref={containerRef} className="fixed inset-0 bg-black z-[9999] flex flex-col overflow-hidden font-sans select-none">
       
-      {/* SENSOR AREA: Top 25% of screen detects movement to show controls */}
+      {/* SENSOR AREA: Detects movement to show controls */}
       <div 
-        className="absolute top-0 left-0 w-full h-[25%] z-[110] cursor-pointer"
+        className="absolute inset-0 z-[110] cursor-pointer"
         onMouseMove={() => setShowControls(true)}
         onClick={() => setShowControls(!showControls)}
+        style={{ pointerEvents: showControls ? 'none' : 'auto' }}
       />
 
       {/* TOP CONTROLS - Fades in/out based on state */}
-      <div className={`fixed top-0 left-0 w-full p-3 sm:p-6 z-[120] transition-all duration-500 ease-in-out ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}`}>
+      <div className={`absolute top-0 left-0 w-full p-3 sm:p-6 z-[120] transition-all duration-500 ease-in-out pointer-events-none ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full"}`}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/95 via-black/40 to-transparent -z-10" />
         
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 pointer-events-auto max-w-[75%]">
+        <div className="flex items-start justify-between gap-4 pointer-events-auto">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 max-w-[75%]">
             <Link 
               href={`/${type}/${id}`}
               className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md transition-all active:scale-95 shadow-lg"
@@ -113,12 +173,23 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pointer-events-auto shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={(e) => { e.stopPropagation(); setShowGuide(!showGuide); }}
               className="hidden xs:flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-all shadow-lg"
             >
               <HelpCircle className="w-4 h-4 text-gray-300" />
+            </button>
+
+            <button 
+              onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-all shadow-lg"
+            >
+              {isFullscreen ? (
+                <Minimize className="w-4 h-4 text-white" />
+              ) : (
+                <Maximize className="w-4 h-4 text-white" />
+              )}
             </button>
 
             <div className="relative">
@@ -163,7 +234,9 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
           <iframe
             src={iframeUrl}
             className="w-full h-full border-none"
-            allowFullScreen={true}
+            allowFullScreen
+            // @ts-ignore
+            allowfullscreen="true"
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; display-capture"
             // @ts-ignore
             webkitallowfullscreen="true"
