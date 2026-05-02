@@ -16,11 +16,8 @@ interface PlayerProps {
 }
 
 const SOURCES = [
-  { name: "Server 1 (Highly Stable)", domain: "https://vidlink.pro/embed" },
-  { name: "Server 2 (Auto-Indo)", domain: "https://vidsrc.xyz/embed" },
-  { name: "Server 3 (VIP Subtitles)", domain: "https://vidsrc.pro/embed" },
-  { name: "Server 4 (No-Error Mode)", domain: "https://embed.smashystream.com/playere.php" },
-  { name: "Server 5 (Indo Focus)", domain: "https://superembed.cc/embed" },
+  { name: "Server 1 (Auto-Indo)", domain: "https://vidsrc.xyz/embed" },
+  { name: "Server 2 (No-Error Mode)", domain: "https://embed.smashystream.com/playere.php" },
 ];
 
 export default function Player({ id, type, title, poster, season, episode }: PlayerProps) {
@@ -42,26 +39,14 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
     let url = "";
     const cleanId = id;
 
-    if (source.domain.includes("vidlink.pro")) {
-      url = type === 'movie' 
-        ? `${source.domain}/movie/${cleanId}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914&autoplay=false`
-        : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}?primaryColor=e50914&secondaryColor=ffffff&iconColor=e50914&autoplay=false`;
-    } else if (source.domain.includes("vidsrc.xyz")) {
+    if (source.domain.includes("vidsrc.xyz")) {
       url = type === 'movie'
-        ? `${source.domain}/movie/${cleanId}`
-        : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}`;
-    } else if (source.domain.includes("vidsrc.pro")) {
-      url = type === 'movie' 
         ? `${source.domain}/movie/${cleanId}`
         : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}`;
     } else if (source.domain.includes("smashystream.com")) {
       url = type === 'movie'
         ? `${source.domain}?tmdb=${cleanId}`
         : `${source.domain}?tmdb=${cleanId}&season=${season || 1}&episode=${episode || 1}`;
-    } else if (source.domain.includes("superembed.cc")) {
-      url = type === 'movie'
-        ? `${source.domain}/movie/${cleanId}`
-        : `${source.domain}/tv/${cleanId}/${season || 1}/${episode || 1}`;
     }
 
     setIframeUrl(url);
@@ -174,7 +159,7 @@ export default function Player({ id, type, title, poster, season, episode }: Pla
             </div>
             <div className="space-y-4 sm:space-y-6 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
               {[
-                { title: "Switch Server", desc: "Try Server 1 or Server 4 for the best subtitle stability." },
+                { title: "Switch Server", desc: "Try Server 1 or Server 2 for the best stability." },
                 { title: "Enable CC", desc: "Click the CC icon in the bottom right corner of the player." },
                 { title: "Indonesian", desc: "Choose Indonesian from the settings or use auto-translate." }
               ].map((step, i) => (
