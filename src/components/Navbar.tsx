@@ -23,11 +23,11 @@ export default function Navbar() {
         isScrolled || isMobileMenuOpen ? "bg-surface shadow-md" : "bg-gradient-to-b from-black/80 to-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
-          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl sm:text-2xl tracking-tighter shrink-0">
-            <PlaySquare className="w-6 h-6 sm:w-8 h-8 fill-primary" />
-            <span className="hidden xs:inline">Vidia</span>
+      <div className="container mx-auto px-4 lg:px-8 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tighter shrink-0">
+            <PlaySquare className="w-8 h-8 fill-primary" />
+            <span className="hidden sm:inline">Vidia</span>
           </Link>
 
           <div className="hidden md:flex gap-6 text-sm font-medium text-gray-300">
@@ -38,7 +38,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-auto">
           <SearchBar />
           
           {/* Mobile Menu Toggle */}
@@ -57,21 +57,21 @@ export default function Navbar() {
           <div className="flex flex-col p-4 gap-4 text-lg font-bold">
             <Link 
               href="/" 
-              className="hover:text-primary transition-colors p-2"
+              className="hover:text-primary transition-colors p-2 border-b border-white/5"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
             <Link 
               href="/movies" 
-              className="hover:text-primary transition-colors p-2"
+              className="hover:text-primary transition-colors p-2 border-b border-white/5"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Movies
             </Link>
             <Link 
               href="/tv" 
-              className="hover:text-primary transition-colors p-2"
+              className="hover:text-primary transition-colors p-2 border-b border-white/5"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               TV Shows

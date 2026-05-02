@@ -10,17 +10,19 @@ export default function SearchBar() {
   const [results, setResults] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        if (query.length === 0) setIsExpanded(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [query]);
 
   useEffect(() => {
     const performSearch = async () => {
@@ -59,37 +61,65 @@ export default function SearchBar() {
 
   return (
     <div className="relative" ref={containerRef}>
-      <div className="flex items-center bg-surface border border-border rounded-full px-3 py-1.5 sm:px-4 sm:py-2 w-32 xs:w-40 sm:w-64 focus-within:w-48 xs:focus-within:w-56 sm:focus-within:w-80 transition-all duration-300">
-        <Search className="w-3.5 h-3.5 sm:w-4 h-4 text-gray-400 mr-2 shrink-0" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search..."
-          className="bg-transparent border-none outline-none text-xs sm:text-sm w-full text-foreground placeholder:text-gray-500"
-          autoComplete="off"
-        />
-        {isLoading && <Loader2 className="w-3 h-3 sm:w-4 h-4 text-primary animate-spin ml-2 shrink-0" />}
-        {query && !isLoading && (
-          <button onClick={() => setQuery("")} className="ml-2 text-gray-400 hover:text-white shrink-0">
-            <X className="w-3 h-3 sm:w-4 h-4" />
-          </button>
+      <div 
+        className={`flex items-center bg-surface border border-border rounded-full transition-all duration-500 ease-in-out ${
+          isExpanded 
+            ? "w-48 xs:w-56 sm:w-64 md:w-80 px-3 py-1.5 sm:px-4 sm:py-2" 
+            : "w-10 h-10 px-0 py-0 justify-center cursor-pointer hover:bg-white/5"
+        }`}
+        onClick={() => !isExpanded && setIsExpanded(true)}
+      >
+        <Search className={`w-4 h-4 text-gray-400 shrink-0 ${!isExpanded ? "" : "mr-2 ml-1"}`} />
+        
+        {isExpanded && (
+          <>
+            <input
+              autoFocus
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search..."
+              className="bg-transparent border-none outline-none text-xs sm:text-sm w-full text-foreground placeholder:text-gray-500"
+              autoComplete="off"
+            />
+            {isLoading && <Loader2 className="w-3 h-3 sm:w-4 h-4 text-primary animate-spin ml-2 shrink-0" />}
+            {query && !isLoading && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setQuery(""); }} 
+                className="ml-2 text-gray-400 hover:text-white shrink-0"
+              >
+                <X className="w-3 h-3 sm:w-4 h-4" />
+              </button>
+            )}
+            {!query && !isLoading && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }} 
+                className="ml-2 text-gray-500 hover:text-white shrink-0 sm:hidden"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </>
         )}
       </div>
 
       {isOpen && query.length > 0 && (
-        <div className="absolute top-full mt-2 w-screen max-w-[320px] sm:w-full right-0 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50 glass-panel">
+        <div className="absolute top-full mt-2 w-[calc(100vw-2rem)] max-w-[320px] right-0 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50 glass-panel">
           {results.length > 0 ? (
             <div className="p-2">
               <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-gray-500 font-bold border-b border-border/50 mb-1">
                 Matching Titles
               </div>
-              <ul className="max-h-[70vh] overflow-y-auto custom-scrollbar">
+              <ul className="max-h-[60vh] overflow-y-auto custom-scrollbar">
                 {results.map((item) => (
                   <li key={`${item.type}-${item.id}`}>
                     <Link
                       href={`/${item.type}/${item.id}`}
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        setIsOpen(false);
+                        setIsExpanded(false);
+                        setQuery("");
+                      }}
                       className="flex items-center gap-3 p-2 hover:bg-primary/10 rounded-lg transition-colors group"
                     >
                       {item.poster_path ? (
@@ -113,7 +143,7 @@ export default function SearchBar() {
           ) : (
             !isLoading && (
               <div className="p-8 text-center text-sm text-gray-400">
-                <p>No results found for "<span className="text-white italic">{query}</span>"</p>
+                <p>No results found</p>
               </div>
             )
           )}
